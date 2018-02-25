@@ -1,0 +1,29 @@
+{
+  "name": "ts-middleware",
+  "version": "1.0.2",
+  "description": "TypeScript Middleware for express",
+  "main": "index.js",
+  "scripts": {
+    "prepack": "tsc -p ."
+  },
+  "keywords": [
+    "typescript",
+    "middleware"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/TheColorRed/typescript-middleware.git"
+  },
+  "author": "Ryan Naddy",
+  "license": "ISC",
+  "types": "./index.d.ts",
+  "devDependencies": {
+    "@types/glob": "^5.0.35",
+    "@types/node": "^9.4.6",
+    "@types/uglify-js": "^2.6.30"
+  },
+  "dependencies": {
+    "glob": "^7.1.2",
+    "uglify-es": "^3.3.9"
+  }
+}
