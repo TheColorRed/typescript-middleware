@@ -1,6 +1,6 @@
 {
   "name": "ts-middleware",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "TypeScript Middleware for express",
   "main": "index.js",
   "scripts": {
