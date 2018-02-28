@@ -158,5 +158,5 @@ async function getMtime(dirPath: string, type: string) {
 }
 
 function getTscPath(tscPath?: string): string {
-  return tscPath ? tscPath : path.join(__dirname, './node_modules/.bin/tsc')
+  return tscPath ? tscPath : path.join(__dirname, '../.bin/tsc')
 }
