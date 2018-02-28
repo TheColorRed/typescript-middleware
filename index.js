@@ -95,5 +95,5 @@ async function getMtime(dirPath, type) {
     });
 }
 function getTscPath(tscPath) {
-    return tscPath ? tscPath : path.join(__dirname, './node_modules/.bin/tsc');
+    return tscPath ? tscPath : path.join(__dirname, '../.bin/tsc');
 }
