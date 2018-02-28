@@ -8,7 +8,8 @@
   },
   "keywords": [
     "typescript",
-    "middleware"
+    "middleware",
+    "express"
   ],
   "repository": {
     "type": "git",
@@ -18,12 +19,14 @@
   "license": "ISC",
   "types": "./index.d.ts",
   "devDependencies": {
+    "@types/express": "^4.11.1",
     "@types/glob": "^5.0.35",
     "@types/node": "^9.4.6",
     "@types/uglify-js": "^2.6.30"
   },
   "dependencies": {
     "glob": "^7.1.2",
+    "typescript": "*",
     "uglify-es": "^3.3.9"
   }
 }

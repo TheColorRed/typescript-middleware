@@ -1,3 +1,5 @@
+Converts typescript to javascript and minify's the code on the fly.
+
 ## Installation
 
 To install the package run the following

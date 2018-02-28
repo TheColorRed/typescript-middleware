@@ -3,35 +3,89 @@ import * as glob from 'glob'
 import * as cp from 'child_process'
 import * as path from 'path'
 import { MinifyOptions } from 'uglify-js'
+import { NextFunction, Request, Response, RequestHandler } from 'express';
 
 const uglify = require('uglify-es')
+declare namespace typeScriptMiddleware {
+  export function tsm(options: TypeScriptOptions | string): RequestHandler
+}
+declare function typeScriptMiddleware(options: TypeScriptOptions | string): any
 
 export interface TypeScriptProject {
+  /**
+   * The tsconfig.json file to use
+   *
+   * @type {string}
+   * @memberof TypeScriptProject
+   */
   config: string
+  /**
+   * Whether or not to enable minification. Defaults to true.
+   *
+   * @type {boolean}
+   * @memberof TypeScriptProject
+   */
   shouldUglify?: boolean
+  /**
+   * uglfiy-es settings.
+   *
+   * @see https://www.npmjs.com/package/uglify-es#minify-options
+   * @type {MinifyOptions}
+   * @memberof TypeScriptProject
+   */
   uglify?: MinifyOptions
 }
 
 export interface TypeScriptOptions {
+  /**
+   * An array of projects to watch
+   *
+   * @type {TypeScriptProject[]}
+   * @memberof TypeScriptOptions
+   */
   projects?: TypeScriptProject[]
+  /**
+   * A single project to watch
+   *
+   * @type {(TypeScriptProject | string)}
+   * @memberof TypeScriptOptions
+   */
   project?: TypeScriptProject | string
+  /**
+   * An alternative tsc compiler to run
+   *
+   * @type {string}
+   * @memberof TypeScriptOptions
+   */
   tsc?: string
 }
 
-module.exports = function (options: TypeScriptOptions | string) {
-  return function (req: any, res: any, next: any) {
-    let projects: TypeScriptProject[] = []
-    if (typeof options == 'string') {
-      projects.push({ config: options })
-    } else {
-      options.projects && (projects = options.projects)
-      options.project && typeof options.project != 'string' && projects.push(options.project)
-      options.project && typeof options.project == 'string' && projects.push({ config: options.project })
+/**
+ * The primary middleware function
+ *
+ * @export
+ * @param {(TypeScriptOptions | string)} options Options to pass or a path to the tsconfig.json
+ * @returns
+ */
+export declare function tsm(options: TypeScriptOptions | string): RequestHandler
+
+module.exports = function (options: TypeScriptOptions | string): RequestHandler {
+  return function (req: Request, res: Response, next: NextFunction) {
+    if (path.parse(req.path).ext.match(/(\.min)?\.js$/)) {
+      let projects: TypeScriptProject[] = []
+      if (typeof options == 'string') {
+        projects.push({ config: options })
+      } else {
+        options.projects && (projects = options.projects)
+        options.project && typeof options.project != 'string' && projects.push(options.project)
+        options.project && typeof options.project == 'string' && projects.push({ config: options.project })
+      }
+      projects.forEach(async project => {
+        let tsc = typeof options == 'string' ? undefined : options.tsc
+        // TODO: Only compile files or files from projects that were requested
+        await compileProject(project, tsc)
+      })
     }
-    projects.forEach(async project => {
-      let tsc = typeof options == 'string' ? undefined : options.tsc
-      await compileProject(project, tsc)
-    })
     next()
   }
 }
@@ -103,6 +157,6 @@ async function getMtime(dirPath: string, type: string) {
   })
 }
 
-function getTscPath(path?: string): string {
-  return path ? path : 'tsc'
+function getTscPath(tscPath?: string): string {
+  return tscPath ? tscPath : path.join(__dirname, './node_modules/.bin/tsc')
 }

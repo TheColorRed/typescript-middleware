@@ -7,19 +7,22 @@ const path = require("path");
 const uglify = require('uglify-es');
 module.exports = function (options) {
     return function (req, res, next) {
-        let projects = [];
-        if (typeof options == 'string') {
-            projects.push({ config: options });
+        if (path.parse(req.path).ext.match(/(\.min)?\.js$/)) {
+            let projects = [];
+            if (typeof options == 'string') {
+                projects.push({ config: options });
+            }
+            else {
+                options.projects && (projects = options.projects);
+                options.project && typeof options.project != 'string' && projects.push(options.project);
+                options.project && typeof options.project == 'string' && projects.push({ config: options.project });
+            }
+            projects.forEach(async (project) => {
+                let tsc = typeof options == 'string' ? undefined : options.tsc;
+                // TODO: Only compile files or files from projects that were requested
+                await compileProject(project, tsc);
+            });
         }
-        else {
-            options.projects && (projects = options.projects);
-            options.project && typeof options.project != 'string' && projects.push(options.project);
-            options.project && typeof options.project == 'string' && projects.push({ config: options.project });
-        }
-        projects.forEach(async (project) => {
-            let tsc = typeof options == 'string' ? undefined : options.tsc;
-            await compileProject(project, tsc);
-        });
         next();
     };
 };
@@ -91,6 +94,6 @@ async function getMtime(dirPath, type) {
         }
     });
 }
-function getTscPath(path) {
-    return path ? path : 'tsc';
+function getTscPath(tscPath) {
+    return tscPath ? tscPath : path.join(__dirname, './node_modules/.bin/tsc');
 }
